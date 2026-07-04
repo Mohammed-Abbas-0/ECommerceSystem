@@ -1,7 +1,5 @@
-﻿using Hangfire;
-using Products.Application;
-using Products.Infrastructure;
-using Products.Infrastructure.Jobs;
+using Orders.Application;
+using Orders.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,17 +17,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseHangfireDashboard("/hangfire");
-
-RecurringJob.AddOrUpdate<StockCheckJob>(
-    "stock-check",
-    job => job.CheckLowStockAsync(),
-    Cron.Hourly);
-
-RecurringJob.AddOrUpdate<DailyReportJob>(
-    "daily-report",
-    job => job.GenerateReportAsync(),
-    Cron.Daily);
 
 app.UseHttpsRedirection();
 app.UseAuthorization();

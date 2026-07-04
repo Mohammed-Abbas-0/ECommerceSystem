@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using MassTransit;
 using MediatR;
 using Products.Application.DTOs;
 using Products.Domain.Entities;
 using Products.Domain.Interfaces;
+using Shared.Events.Events;
 
 namespace Products.Application.Features.Products.Commands.CreateProduct;
 
@@ -10,16 +12,20 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
 {
     private readonly IProductRepository _repository;
     private readonly IMapper _mapper;
+    private readonly IPublishEndpoint _publishEndpoint;
 
-    public CreateProductCommandHandler(IProductRepository repository, IMapper mapper)
+    public CreateProductCommandHandler(
+        IProductRepository repository,
+        IMapper mapper,
+        IPublishEndpoint publishEndpoint)
     {
         _repository = repository;
         _mapper = mapper;
+        _publishEndpoint = publishEndpoint;
     }
 
     public async Task<ProductDto> Handle(CreateProductCommand request, CancellationToken cancellationToken)
     {
-        // بنستخدم الـ Factory Method من الـ Domain
         var product = Product.Create(
             request.Name,
             request.Description,
@@ -28,10 +34,14 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
             request.Category
         );
 
-        // بنحفظ عن طريق الـ Interface مش الـ Implementation
         await _repository.AddAsync(product);
 
-        // بنحول من Entity لـ DTO
+        await _publishEndpoint.Publish(new ProductStockDecreasedEvent(
+            product.Id,
+            product.Name,
+            product.Stock
+        ));
+
         return _mapper.Map<ProductDto>(product);
     }
 }

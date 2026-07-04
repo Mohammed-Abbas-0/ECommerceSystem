@@ -9,11 +9,12 @@ public class DeleteProductCommandHandler : IRequestHandler<UpdateProductCommand,
 {
     private readonly IProductRepository _repository;
     private readonly IMapper _mapper;
-
-    public DeleteProductCommandHandler(IProductRepository repository, IMapper mapper)
+    private readonly ICacheService _cache;
+    public DeleteProductCommandHandler(IProductRepository repository, IMapper mapper, ICacheService cache)
     {
         _repository = repository;
         _mapper = mapper;
+        _cache = cache;
     }
 
     public async Task<ProductDto> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
@@ -26,6 +27,8 @@ public class DeleteProductCommandHandler : IRequestHandler<UpdateProductCommand,
         product.Update(request.Name, request.Description, request.Price, request.Category);
 
         await _repository.UpdateAsync(product);
+
+        await _cache.RemoveAsync($"product:{request.Id}");
 
         return _mapper.Map<ProductDto>(product);
     }
