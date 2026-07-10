@@ -1,11 +1,15 @@
 using MassTransit;
 using Notification.API.Consumers;
+using Notification.API.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// SignalR
+builder.Services.AddSignalR();
 
 // MassTransit + RabbitMQ
 builder.Services.AddMassTransit(x =>
@@ -36,5 +40,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+
+// SignalR Endpoint
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 app.Run();
