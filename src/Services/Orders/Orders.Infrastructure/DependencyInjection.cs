@@ -4,6 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Orders.Domain.Interfaces;
 using Orders.Infrastructure.Persistence;
 using Orders.Infrastructure.Repositories;
+using Orders.Infrastructure.Services;
+
 
 namespace Orders.Infrastructure;
 
@@ -17,6 +19,7 @@ public static class DependencyInjection
             configuration.GetSection("MongoDbSettings"));
 
         services.AddScoped<IOrderRepository, OrderRepository>();
+        services.AddScoped<IProductGrpcClient, ProductGrpcClient>();
 
         // MassTransit + RabbitMQ
         services.AddMassTransit(x =>

@@ -13,15 +13,18 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
     private readonly IOrderRepository _repository;
     private readonly IMapper _mapper;
     private readonly IPublishEndpoint _publishEndpoint;
+    private readonly IProductGrpcClient _grpcClient;
 
     public CreateOrderCommandHandler(
         IOrderRepository repository,
         IMapper mapper,
-        IPublishEndpoint publishEndpoint)
+        IPublishEndpoint publishEndpoint,
+        IProductGrpcClient grpcClient)
     {
         _repository = repository;
         _mapper = mapper;
         _publishEndpoint = publishEndpoint;
+        _grpcClient = grpcClient;
     }
 
     public async Task<OrderDto> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -29,7 +32,16 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
         var order = Order.Create(request.CustomerId);
 
         foreach (var item in request.Items)
+        {
+            var isAvailable = await _grpcClient.CheckStockAsync(
+                item.ProductId, item.Quantity);
+
+            if (!isAvailable)
+                throw new InvalidOperationException(
+                    $"Product {item.ProductName} is out of stock");
+
             order.AddItem(item.ProductId, item.ProductName, item.Price, item.Quantity);
+        }
 
         await _repository.AddAsync(order);
 

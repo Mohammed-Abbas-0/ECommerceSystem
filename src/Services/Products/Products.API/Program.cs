@@ -1,4 +1,5 @@
 ﻿using Hangfire;
+using Products.API.Services;
 using Products.Application;
 using Products.Infrastructure;
 using Products.Infrastructure.Jobs;
@@ -11,6 +12,9 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+
+// gRPC
+builder.Services.AddGrpc();
 
 var app = builder.Build();
 
@@ -34,5 +38,8 @@ RecurringJob.AddOrUpdate<DailyReportJob>(
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+
+// gRPC Endpoint
+app.MapGrpcService<ProductGrpcHandler>();
 
 app.Run();
