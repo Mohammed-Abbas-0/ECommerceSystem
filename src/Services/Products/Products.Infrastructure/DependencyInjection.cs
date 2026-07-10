@@ -1,5 +1,4 @@
 ﻿using Hangfire;
-using Hangfire.SqlServer;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
