@@ -4,7 +4,13 @@ using Products.Application;
 using Products.Infrastructure;
 using Products.Infrastructure.Jobs;
 
+
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenLocalhost(5292, o => o.Protocols =
+        Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http1AndHttp2);
+});
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -15,6 +21,8 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 // gRPC
 builder.Services.AddGrpc();
+
+
 
 var app = builder.Build();
 

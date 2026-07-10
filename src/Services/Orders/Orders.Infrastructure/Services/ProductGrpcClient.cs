@@ -1,8 +1,8 @@
 ﻿using Grpc.Net.Client;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Orders.API.Protos;
 using Orders.Domain.Interfaces;
+using Orders.Infrastructure.Protos; 
 
 namespace Orders.Infrastructure.Services;
 
@@ -18,8 +18,16 @@ public class ProductGrpcClient : IProductGrpcClient
         _logger = logger;
 
         var channel = GrpcChannel.ForAddress(
-            configuration["GrpcSettings:ProductServiceUrl"]
-                ?? "http://localhost:5292");
+                    configuration["GrpcSettings:ProductServiceUrl"]
+                        ?? "http://localhost:5292",
+                    new GrpcChannelOptions
+                    {
+                        HttpHandler = new HttpClientHandler
+                        {
+                            ServerCertificateCustomValidationCallback =
+                                HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                        }
+                    });
 
         _client = new ProductGrpcService.ProductGrpcServiceClient(channel);
     }
