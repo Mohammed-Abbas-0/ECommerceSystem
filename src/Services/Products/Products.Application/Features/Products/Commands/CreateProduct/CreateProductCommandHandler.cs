@@ -36,11 +36,21 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
 
         await _repository.AddAsync(product);
 
-        await _publishEndpoint.Publish(new ProductStockDecreasedEvent(
-            product.Id,
-            product.Name,
-            product.Stock
-        ));
+        //await _publishEndpoint.Publish(new ProductStockDecreasedEvent(
+        //    product.Id,
+        //    product.Name,
+        //    product.Stock
+        //));
+
+        // Use It For save on ElasticSearch and other services, like notification service, etc.
+        await _publishEndpoint.Publish(new ProductCreatedEvent(
+         product.Id,
+         product.Name,
+         product.Description,
+         product.Price,
+         product.Stock,
+         product.Category
+     ));
 
         return _mapper.Map<ProductDto>(product);
     }

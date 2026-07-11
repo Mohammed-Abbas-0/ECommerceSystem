@@ -1,4 +1,5 @@
 ﻿using Hangfire;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Products.API.Services;
 using Products.Application;
 using Products.Infrastructure;
@@ -8,8 +9,13 @@ using Products.Infrastructure.Jobs;
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenLocalhost(5292, o => o.Protocols =
-        Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http1AndHttp2);
+    // بنقوله اشتغل على Port 5292 بـ HTTP/1.1
+    options.ListenLocalhost(5292, o =>
+        o.Protocols = HttpProtocols.Http1);
+
+    // واشتغل على Port 5293 بـ HTTP/2 للـ gRPC
+    options.ListenLocalhost(5293, o =>
+        o.Protocols = HttpProtocols.Http2);
 });
 
 builder.Services.AddControllers();
@@ -43,7 +49,7 @@ RecurringJob.AddOrUpdate<DailyReportJob>(
     job => job.GenerateReportAsync(),
     Cron.Daily);
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection(); so Grpc
 app.UseAuthorization();
 app.MapControllers();
 
