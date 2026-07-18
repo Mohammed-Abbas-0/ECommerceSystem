@@ -37,8 +37,8 @@ public class ElasticsearchService
         ✅ Fuzzy Search
         ✅ Wildcard Search
         ✅ Prefix Search
-        ✅ Pagination (400 نتيجة)
-        ✅ Boost (Name أهم من Description)
+        ✅ Pagination 
+        ✅ Boost
     */
     public async Task<IEnumerable<ProductDocument>> SearchAsync(string query, int size = 400)
     {
@@ -48,7 +48,7 @@ public class ElasticsearchService
             .Query(q => q
                 .Bool(b => b
                     .Should(
-                        // Fuzzy Search - يتقبل الأخطاء
+                        // Fuzzy - Anywhere in the word with typo tolerance
                         sh => sh.MultiMatch(m => m
                             .Fields(f => f
                                 .Field(p => p.Name, boost: 3)
@@ -58,7 +58,7 @@ public class ElasticsearchService
                             .Fuzziness(Fuzziness.Auto)
                             .PrefixLength(1)),
 
-                        // Wildcard - يبحث في أي جزء
+                        // Wildcard - Anywhere in the word with *query*
                         sh => sh.Wildcard(w => w
                             .Field(p => p.Name)
                             .Value($"*{query.ToLower()}*")),
@@ -66,8 +66,7 @@ public class ElasticsearchService
                         sh => sh.Wildcard(w => w
                             .Field(p => p.Category)
                             .Value($"*{query.ToLower()}*")),
-
-                        // Prefix - يبحث من أول الكلمة
+                        // Prefix - Start of the word
                         sh => sh.Prefix(p => p
                             .Field(f => f.Name)
                             .Value(query.ToLower()))

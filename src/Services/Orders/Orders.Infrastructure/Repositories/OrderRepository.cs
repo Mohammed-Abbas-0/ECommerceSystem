@@ -13,6 +13,8 @@ public class OrderRepository : IOrderRepository
 {
     private readonly IMongoCollection<Order> _orders;
 
+    // Add Static constructor to register the Guid serializer so it handles Guid as a string in MongoDB.
+    // This is necessary because the default serializer for Guid may not match the representation in the database.
     static OrderRepository()
     {
         BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
