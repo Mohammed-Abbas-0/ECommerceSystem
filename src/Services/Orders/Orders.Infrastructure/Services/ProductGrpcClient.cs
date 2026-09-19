@@ -1,6 +1,7 @@
 ﻿using Grpc.Net.Client;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using MongoDB.Driver;
 using Orders.Domain.Interfaces;
 using Orders.Infrastructure.Protos;
 using Orders.Infrastructure.Resilience;
